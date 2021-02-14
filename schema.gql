@@ -1,0 +1,15 @@
+type Track{
+	id: ID
+	name: String
+}
+
+type Playlist{
+	id: ID
+	title: String
+	tracks: [Track]
+}
+
+type Query {
+    playlists(ids: [ID]!): [Playlist]
+    tracks(ids: [ID]!): [Track]
+}
