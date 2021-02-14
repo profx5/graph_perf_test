@@ -1,5 +1,7 @@
 const { ApolloServer, gql } = require('apollo-server');
 const { RESTDataSource } = require('apollo-datasource-rest');
+const fetch = require('node-fetch');
+
 
 const typeDefs = gql`
     type Track{
@@ -22,42 +24,32 @@ const typeDefs = gql`
 
 const serverUri = process.env.TEST_SERVER_URI || "http://localhost:8080"
 
-class TracksAPI extends RESTDataSource {
-    constructor() {
-        super()
-        this.baseURL = serverUri
-    }
-
-    async getTracks() {
-        return this.get('/tracks.json')
-    }
+async function loadTracks() {
+    const response = await fetch(serverUri + '/tracks.json');
+    return await response.json();
 }
 
-class PlaylistsAPI extends RESTDataSource {
-    constructor() {
-        super()
-        this.baseURL = serverUri
-    }
 
-    async getPlaylists() {
-        return this.get('/playlists.json')
-    }
+async function  loadPlaylists() {
+    const response = await fetch(serverUri + '/playlists.json');
+    return await response.json();
 }
+
 
 const resolvers = {
     Query: {
         tracks: async (_source, { ids }, { dataSources }) => {
-            return dataSources.tracksAPI.getTracks();
+            return await loadTracks();
         },
 
         playlists: async (_source, { ids }, { dataSources }) => {
-            return dataSources.playlistsAPI.getPlaylists();
+            return await loadPlaylists();
         },
     },
 
     Playlist: {
         tracks: async (parent, _source, { dataSources }) => {
-            return dataSources.tracksAPI.getTracks();
+            return await loadTracks();
         },
     },
 };
@@ -65,12 +57,7 @@ const resolvers = {
 
 
 const server = new ApolloServer({
-    typeDefs, resolvers, playground: true, dataSources: () => {
-        return {
-            tracksAPI: new TracksAPI(),
-            playlistsAPI: new PlaylistsAPI(),
-        };
-    },
+    typeDefs, resolvers, playground: true
 });
 
 // The `listen` method launches a web server.

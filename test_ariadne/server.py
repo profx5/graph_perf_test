@@ -1,5 +1,6 @@
 import os
 import aiohttp
+import ujson
 from ariadne import QueryType, make_executable_schema, ObjectType
 from ariadne.asgi import GraphQL
 from starlette.applications import Starlette
@@ -7,26 +8,38 @@ from starlette.responses import PlainTextResponse
 from starlette.routing import Route
 
 
+type_defs = """
+    type Track{
+        id: ID
+        name: String
+    }
 
-with open("../schema.gql") as f:
-    type_defs = f.read()
+    type Playlist{
+        id: ID
+        title: String
+        tracks: [Track]
+    }
+
+    type Query {
+        playlists(ids: [ID]!): [Playlist]
+        tracks(ids: [ID]!): [Track]
+}"""
 
 
 query = QueryType()
 playlist = ObjectType("Playlist")
 server_uri = os.environ.get("TEST_SERVER_URI", "http://localhost:8080")
 
+session = aiohttp.ClientSession()
 
 async def load_tracks(ids):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f"{server_uri}/tracks.json") as resp:
-            return await resp.json()
+    async with session.get(f"{server_uri}/tracks.json") as resp:
+        return await resp.json(loads=ujson.loads)
 
 
 async def load_playlists(ids):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f"{server_uri}/playlists.json") as resp:
-            return await resp.json()
+    async with session.get(f"{server_uri}/playlists.json") as resp:
+        return await resp.json(loads=ujson.loads)
 
 
 @playlist.field("tracks")
@@ -49,4 +62,4 @@ async def ping(request):
 schema = make_executable_schema(type_defs, query, playlist)
 
 app = Starlette(routes=[Route("/ping/", ping)])
-app.mount("/graphql", GraphQL(schema))
+app.mount("/", GraphQL(schema))
