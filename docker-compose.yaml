@@ -31,6 +31,17 @@ services:
       - "traefik.http.routers.apollo.rule=Host(`localhost`)"
       - "traefik.http.routers.apollo.entrypoints=apollo"
 
+  tartiflette_aiohttp:
+    build: ./test_tartiflette_aiohttp
+    depends_on:
+      - test-api-server
+    environment:
+      TEST_SERVER_URI: "http://test-api-server:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tartiflette.rule=Host(`localhost`)"
+      - "traefik.http.routers.tartiflette.entrypoints=tartiflette"
+
   traefik:
     image: "traefik:v2.4"
     container_name: "traefik"
@@ -40,9 +51,11 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.ariadne.address=:8081"
       - "--entrypoints.apollo.address=:8082"
+      - "--entrypoints.tartiflette.address=:8083"
     ports:
       - "8080:8080"
       - "8081:8081"
       - "8082:8082"
+      - "8083:8083"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
