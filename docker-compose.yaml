@@ -22,6 +22,11 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ariadne.rule=Host(`localhost`)"
       - "traefik.http.routers.ariadne.entrypoints=ariadne"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G  
 
   apollo:
     image: test-apollo-perf
@@ -34,6 +39,12 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.apollo.rule=Host(`localhost`)"
       - "traefik.http.routers.apollo.entrypoints=apollo"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
 
   tartiflette_aiohttp:
     build: ./test_tartiflette_aiohttp
@@ -45,6 +56,11 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.tartiflette.rule=Host(`localhost`)"
       - "traefik.http.routers.tartiflette.entrypoints=tartiflette"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
 
   graphene:
     image: test-graphene-perf
@@ -57,6 +73,11 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.graphene.rule=Host(`localhost`)"
       - "traefik.http.routers.graphene.entrypoints=graphene"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
 
   traefik:
     image: "traefik:v2.4"

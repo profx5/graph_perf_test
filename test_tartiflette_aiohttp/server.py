@@ -71,6 +71,7 @@ web.run_app(
         web.Application(),
         engine_sdl=type_defs,
         executor_http_methods=["POST", "GET"],
+        executor_http_endpoint="/"
     ),
     port="8000",
 )
